@@ -52,7 +52,7 @@ export async function POST() {
       return NextResponse.json({ error: `Failed to create move_issue tool: ${err}` }, { status: 400 });
     }
     const moveIssueData = await moveIssueResponse.json();
-    const moveIssueId = moveIssueData.tool_id;
+    const moveIssueId = moveIssueData.id;
 
     console.log("ElevenLabs Setup: Creating create_issue tool...");
     // 2. Create create_issue tool
@@ -97,7 +97,7 @@ export async function POST() {
       return NextResponse.json({ error: `Failed to create create_issue tool: ${err}` }, { status: 400 });
     }
     const createIssueData = await createIssueResponse.json();
-    const createIssueId = createIssueData.tool_id;
+    const createIssueId = createIssueData.id;
 
     console.log("ElevenLabs Setup: Creating delete_issue tool...");
     // 3. Create delete_issue tool
@@ -128,7 +128,7 @@ export async function POST() {
       return NextResponse.json({ error: `Failed to create delete_issue tool: ${err}` }, { status: 400 });
     }
     const deleteIssueData = await deleteIssueResponse.json();
-    const deleteIssueId = deleteIssueData.tool_id;
+    const deleteIssueId = deleteIssueData.id;
 
     console.log("ElevenLabs Setup: Creating conversational agent...");
     // 4. Create the Conversational Agent
