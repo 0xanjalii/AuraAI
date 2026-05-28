@@ -22,6 +22,7 @@ export default function AuraVoiceInterface() {
   const [customCommand, setCustomCommand] = useState("");
   const [showPresets, setShowPresets] = useState(false);
   const [agentId, setAgentId] = useState("");
+  const [isProvisioning, setIsProvisioning] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Sync settings/agent ID from localStorage
@@ -29,6 +30,32 @@ export default function AuraVoiceInterface() {
     const savedAgent = localStorage.getItem("aura_agent_id") || process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID || "";
     setAgentId(savedAgent);
   }, []);
+
+  const handleAutoProvision = async () => {
+    setIsProvisioning(true);
+    setStatusText("Provisioning real ElevenLabs Voice Agent...");
+    addLog("info", "Requesting ElevenLabs agent creation & tool bindings...");
+    try {
+      const response = await fetch("/api/agent/setup", {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (response.ok && data.agentId) {
+        localStorage.setItem("aura_agent_id", data.agentId);
+        setAgentId(data.agentId);
+        addLog("info", `ElevenLabs: Agent successfully created with ID ${data.agentId}. Saved to configuration.`);
+        setStatusText("ElevenLabs Agent ready! Click mic to start.");
+      } else {
+        addLog("error", `Provisioning failed: ${data.error || "Unknown error"}`);
+        setStatusText(`Provisioning error: ${data.error || "Unknown error"}`);
+      }
+    } catch (e: any) {
+      addLog("error", `Provisioning failed: ${e.message || e}`);
+      setStatusText("Provisioning API call failed.");
+    } finally {
+      setIsProvisioning(false);
+    }
+  };
 
   const presetCommands = [
     "Aura, move AUR-1 to Done",
@@ -226,9 +253,19 @@ export default function AuraVoiceInterface() {
                 ElevenLabs Agent Active
               </span>
             ) : (
-              <span className="flex items-center gap-1 text-[8px] bg-[#222] text-text-secondary border border-border-main px-1.5 py-0.2 rounded font-semibold">
-                Sandbox Simulation
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1 text-[8px] bg-[#222] text-text-secondary border border-border-main px-1.5 py-0.2 rounded font-semibold">
+                  Sandbox Simulation
+                </span>
+                <button
+                  onClick={handleAutoProvision}
+                  disabled={isProvisioning}
+                  className="text-[9px] bg-accent-purple/20 hover:bg-accent-purple/30 border border-accent-purple/40 text-accent-purple font-semibold px-2 py-0.5 rounded transition-all cursor-pointer disabled:opacity-50"
+                  title="Automatically configure voice agent and client tools on your ElevenLabs account"
+                >
+                  {isProvisioning ? "Provisioning..." : "⚡ Provision Real Agent"}
+                </button>
+              </div>
             )}
             <button 
               onClick={() => setShowPresets(!showPresets)}

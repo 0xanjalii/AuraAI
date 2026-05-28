@@ -8,7 +8,7 @@ export default function SettingsView() {
   const { addLog, supabaseCreds, connectSupabase, disconnectSupabase } = useIssues();
 
   // Voice States (Stored in localStorage or memory)
-  const [agentId, setAgentId] = useState("aura-conversational-v4");
+  const [agentId, setAgentId] = useState("");
   const [voiceModel, setVoiceModel] = useState("eleven_multilingual_v2");
   const [stability, setStability] = useState(75);
   const [similarity, setSimilarity] = useState(85);
@@ -32,7 +32,7 @@ export default function SettingsView() {
 
   // Load voice parameters from local storage on mount
   useEffect(() => {
-    const savedAgent = localStorage.getItem("aura_agent_id");
+    const savedAgent = localStorage.getItem("aura_agent_id") || process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID || "";
     const savedModel = localStorage.getItem("aura_voice_model");
     if (savedAgent) setAgentId(savedAgent);
     if (savedModel) setVoiceModel(savedModel);
