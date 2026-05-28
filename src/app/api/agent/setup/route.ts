@@ -130,6 +130,45 @@ export async function POST() {
     const deleteIssueData = await deleteIssueResponse.json();
     const deleteIssueId = deleteIssueData.id;
 
+    console.log("ElevenLabs Setup: Creating update_issue_text tool...");
+    // 3b. Create update_issue_text tool
+    const updateIssueTextResponse = await fetch("https://api.elevenlabs.io/v1/convai/tools", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        tool_config: {
+          type: "client",
+          name: "update_issue_text",
+          description: "Updates the title or description text details of an issue",
+          params: {
+            type: "object",
+            properties: {
+              issueId: {
+                type: "string",
+                description: "The exact ID of the issue to update, e.g. AUR-1, PERS-2",
+              },
+              title: {
+                type: "string",
+                description: "New title of the issue (optional)",
+              },
+              description: {
+                type: "string",
+                description: "New description of the issue (optional)",
+              },
+            },
+            required: ["issueId"],
+          },
+        },
+      }),
+    });
+
+    if (!updateIssueTextResponse.ok) {
+      const err = await updateIssueTextResponse.text();
+      return NextResponse.json({ error: `Failed to create update_issue_text tool: ${err}` }, { status: 400 });
+    }
+    const updateIssueTextData = await updateIssueTextResponse.json();
+    const updateIssueTextId = updateIssueTextData.id;
+
     console.log("ElevenLabs Setup: Creating conversational agent...");
     // 4. Create the Conversational Agent
     const agentResponse = await fetch("https://api.elevenlabs.io/v1/convai/agents/create", {
@@ -146,10 +185,11 @@ You can perform actions on issues using tools.
 Available tools:
 - create_issue: Use this to create issues.
 - move_issue: Use this to move or transition an issue to a new status.
+- update_issue_text: Use this to update the title or description text details of an existing issue.
 - delete_issue: Use this to delete/remove issues.
 
 Keep your spoken responses extremely short, concise, and professional. Confirm the action when you execute tools.`,
-              tool_ids: [moveIssueId, createIssueId, deleteIssueId],
+              tool_ids: [moveIssueId, createIssueId, deleteIssueId, updateIssueTextId],
             },
             first_message: "Hello! I am Aura. How can I help you manage your board today?",
             language: "en",

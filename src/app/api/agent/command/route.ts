@@ -19,11 +19,17 @@ Supported actions:
    - issueId: The issue ID, matching pattern (PREFIX-NUMBER, e.g. "AUR-12", "PERS-2", "HACK-4")
    - status: "Todo" | "In Progress" | "Done"
 
-3. DELETE_ISSUE: Deleting an issue.
+3. UPDATE_ISSUE: Updating the title or description text details of an issue.
+   Parameters:
+   - issueId: The issue ID (e.g. "AUR-12")
+   - title: (optional) New title of the task (string)
+   - description: (optional) New description text of the task (string)
+
+4. DELETE_ISSUE: Deleting an issue.
    Parameters:
    - issueId: The issue ID (e.g. "AUR-12")
 
-4. UNKNOWN: If the command is not related to creating, updating, or deleting issues.
+5. UNKNOWN: If the command is not related to creating, updating, or deleting issues.
 
 Format your response as a valid, single JSON object ONLY. Do not include markdown code block syntax (like \`\`\`json) in your raw response.
 
@@ -34,6 +40,10 @@ Examples:
   Response: {"action": "UPDATE_STATUS", "issueId": "AUR-1", "status": "In Progress"}
 - Input: "Aura, complete HACK-3"
   Response: {"action": "UPDATE_STATUS", "issueId": "HACK-3", "status": "Done"}
+- Input: "Aura, change the title of AUR-2 to Setup Voice Client Provider"
+  Response: {"action": "UPDATE_ISSUE", "issueId": "AUR-2", "title": "Setup Voice Client Provider"}
+- Input: "Aura, update HACK-4 description to Record dynamic showcase of the board"
+  Response: {"action": "UPDATE_ISSUE", "issueId": "HACK-4", "description": "Record dynamic showcase of the board"}
 - Input: "Aura, delete PERS-2"
   Response: {"action": "DELETE_ISSUE", "issueId": "PERS-2"}
 - Input: "What is the weather today?"

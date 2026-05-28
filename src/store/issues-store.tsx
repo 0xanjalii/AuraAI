@@ -22,9 +22,10 @@ export interface Issue {
 }
 
 interface LLMPayload {
-  action: "CREATE_ISSUE" | "UPDATE_STATUS" | "DELETE_ISSUE" | "UNKNOWN";
+  action: "CREATE_ISSUE" | "UPDATE_STATUS" | "UPDATE_ISSUE" | "DELETE_ISSUE" | "UNKNOWN";
   issueId?: string;
   title?: string;
+  description?: string;
   status?: IssueStatus;
   priority?: Priority;
   assigneeName?: string;
@@ -536,6 +537,12 @@ export function IssuesProvider({ children }: { children: React.ReactNode }) {
       const deleteRegex = new RegExp(`(?:delete|remove|destroy)\\s+${prefix}[- ]?(\\d+)`, "i");
       const deleteMatch = cleanText.match(deleteRegex);
 
+      const updateTitleRegex = new RegExp(`(?:change|update|set)\\s+(?:the\\s+)?title\\s+of\\s+${prefix}[- ]?(\\d+)\\s+to\\s+(.+)`, "i");
+      const updateTitleMatch = cleanText.match(updateTitleRegex);
+
+      const updateDescRegex = new RegExp(`(?:change|update|set)\\s+(?:the\\s+)?description\\s+of\\s+${prefix}[- ]?(\\d+)\\s+to\\s+(.+)`, "i");
+      const updateDescMatch = cleanText.match(updateDescRegex);
+
       const activePrefixUpper = prefix.toUpperCase();
 
       if (moveMatch) {
@@ -572,6 +579,24 @@ export function IssuesProvider({ children }: { children: React.ReactNode }) {
           issueId: `${activePrefixUpper}-${num}`,
           rawText: text,
         };
+      } else if (updateTitleMatch) {
+        const num = updateTitleMatch[1];
+        const newTitle = updateTitleMatch[2].trim();
+        payload = {
+          action: "UPDATE_ISSUE",
+          issueId: `${activePrefixUpper}-${num}`,
+          title: newTitle.charAt(0).toUpperCase() + newTitle.slice(1),
+          rawText: text,
+        };
+      } else if (updateDescMatch) {
+        const num = updateDescMatch[1];
+        const newDesc = updateDescMatch[2].trim();
+        payload = {
+          action: "UPDATE_ISSUE",
+          issueId: `${activePrefixUpper}-${num}`,
+          description: newDesc.charAt(0).toUpperCase() + newDesc.slice(1),
+          rawText: text,
+        };
       } else if (createMatch) {
         const priorityRaw = createMatch[1] as Priority | undefined;
         const priority: Priority = priorityRaw || "medium";
@@ -598,6 +623,18 @@ export function IssuesProvider({ children }: { children: React.ReactNode }) {
       } else {
         payload.action = "UNKNOWN";
         addLog("error", `Issue ${payload.issueId} not found in this workspace.`);
+      }
+    } else if (payload.action === "UPDATE_ISSUE" && payload.issueId) {
+      const exists = issues.some((issue) => issue.id === payload.issueId);
+      if (exists) {
+        const updates: Partial<Issue> = {};
+        if (payload.title !== undefined) updates.title = payload.title;
+        if (payload.description !== undefined) updates.description = payload.description;
+        updateIssue(payload.issueId, updates);
+        addLog("llm_response", `Aura Board Action: Updated ${payload.issueId} details`, JSON.stringify(payload, null, 2));
+      } else {
+        payload.action = "UNKNOWN";
+        addLog("error", `Issue ${payload.issueId} not found in database.`);
       }
     } else if (payload.action === "CREATE_ISSUE" && payload.title && payload.status && payload.priority) {
       addIssue(payload.title, payload.status, payload.priority);

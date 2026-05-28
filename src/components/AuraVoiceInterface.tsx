@@ -12,6 +12,7 @@ export default function AuraVoiceInterface() {
     processVoiceCommand, 
     addLog,
     addIssue,
+    updateIssue,
     updateIssueStatus,
     deleteIssue
   } = useIssues();
@@ -101,6 +102,14 @@ export default function AuraVoiceInterface() {
         addIssue(title, status || "Todo", priority || "medium", assigneeName);
         addLog("state_change", `ElevenLabs AI Tool Invocation: Created issue "${title}"`);
         return `Success: Created issue "${title}"`;
+      },
+      update_issue_text: async ({ issueId, title, description }: { issueId: string; title?: string; description?: string }) => {
+        const updates: any = {};
+        if (title !== undefined) updates.title = title;
+        if (description !== undefined) updates.description = description;
+        updateIssue(issueId, updates);
+        addLog("state_change", `ElevenLabs AI Tool Invocation: Updated details for ${issueId}`);
+        return `Success: Updated issue ${issueId}`;
       },
       delete_issue: async ({ issueId }: { issueId: string }) => {
         deleteIssue(issueId);
