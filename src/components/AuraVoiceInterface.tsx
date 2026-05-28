@@ -111,11 +111,28 @@ export default function AuraVoiceInterface() {
   });
 
   const startVoiceSession = async () => {
-    const targetAgentId = agentId || process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID;
+    let targetAgentId = agentId || process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID;
     if (!targetAgentId) {
-      addLog("error", "No ElevenLabs Agent ID configured. Falling back to sandbox simulation mode.");
-      simulateVoiceTranscript(presetCommands[0]);
-      return;
+      addLog("info", "No ElevenLabs Agent ID configured. Automatically provisioning a real agent...");
+      setStatusText("Provisioning real voice agent...");
+      try {
+        const response = await fetch("/api/agent/setup", { method: "POST" });
+        const data = await response.json();
+        if (response.ok && data.agentId) {
+          localStorage.setItem("aura_agent_id", data.agentId);
+          setAgentId(data.agentId);
+          targetAgentId = data.agentId;
+          addLog("info", `ElevenLabs: Agent successfully created with ID ${data.agentId}. Saved to configuration.`);
+        } else {
+          addLog("error", `Auto-provisioning failed: ${data.error || "Unknown error"}. Falling back to sandbox.`);
+          simulateVoiceTranscript(presetCommands[0]);
+          return;
+        }
+      } catch (e: any) {
+        addLog("error", `Auto-provisioning failed: ${e.message || e}. Falling back to sandbox.`);
+        simulateVoiceTranscript(presetCommands[0]);
+        return;
+      }
     }
 
     try {
