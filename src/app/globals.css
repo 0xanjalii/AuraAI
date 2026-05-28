@@ -1,26 +1,76 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-canvas: #0E0F11;
+  --color-sidebar: #1A1A1E;
+  --color-card: #121316;
+  --color-card-hover: #16171A;
+  --color-border-main: #27282B;
+  --color-text-primary: #F8F9FA;
+  --color-text-secondary: #8A8F98;
+  --color-accent-blue: #5E6AD2;
+  --color-accent-purple: #8C3DF5;
+  
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Linear-style Dotted Canvas Grid Background */
+.bg-grid-pattern {
+  background-size: 24px 24px;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Custom scrollbars matching Linear */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27282B;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #383A3F;
+}
+
+/* Neon glow animations for AI and Active states */
+.shadow-purple-glow {
+  box-shadow: 0 0 25px 3px rgba(140, 61, 245, 0.3);
+}
+
+.shadow-blue-glow {
+  box-shadow: 0 0 25px 3px rgba(94, 106, 210, 0.3);
+}
+
+/* Pulsing blue outline for in-progress tasks */
+@keyframes inProgressPulse {
+  0%, 100% {
+    border-color: #27282B;
+  }
+  50% {
+    border-color: rgba(94, 106, 210, 0.4);
+    box-shadow: 0 0 8px 1px rgba(94, 106, 210, 0.1);
   }
 }
 
+.animate-pulse-inprogress {
+  animation: inProgressPulse 3s infinite ease-in-out;
+}
+
+/* Accent gradient glows */
+.bg-gradient-purple-blue {
+  background: linear-gradient(135deg, #8C3DF5 0%, #5E6AD2 50%, #00C2FF 100%);
+}
+
+/* Base resets */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #0E0F11;
+  color: #F8F9FA;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
